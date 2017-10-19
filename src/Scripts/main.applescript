@@ -3,17 +3,24 @@
 
 -- written against OS X 10.10.5 and FileMaker 15.0.3
 
+(*
+	2017-10-19 ( eshagdar ): open data viewer. open manage DB. 'added Functions Open' process
+	2017-10-17 ( eshagdar ): update 'promptProcess' to show credential expiration TS.
+	2017-10-16 ( eshagdar ): converted app to source files.
+	2017-05-03 ( eshagdar ): created.
+*)
+
 
 property AppletName : "HTC sous-dev"
 
 property debugMode : false
-property logging : true
+property logging : false
 
 property orgNumLIST : {1, 2}
 
 property idleTime : 5 * minutes
 
-property credentialsTimeout : 2 * hours
+property credentialsTimeout : 2 * minutes --2 * hours
 property credentialsUpdatedTS : (current date) - credentialsTimeout
 property fullAccessCredentials : {}
 property userCredentials : {}
@@ -45,14 +52,13 @@ end reopen
 
 
 on idle
-	credentialsCheck({})
+	credentialsLib's credentialsCheck({})
 	return idleTime
 end idle
 
 
 on quit
-	credentialsCheck({forceClear:true})
-	
+	credentialsLib's credentialsCheck({forceClear:true})
 	continue quit
 end quit
 
@@ -60,15 +66,22 @@ end quit
 
 on mainScript(prefs)
 	try
-		-- set properties in script libraries
-		--set AppletName of privSetLib to my AppletName
-		
-		
+		-- launch htcLib
 		launchHtcLib({})
 		
-		if not debugMode then credentialsEnsure({})
-		runProcess({})
 		
+		-- credentials debugging
+		if debugMode then htcBasic's debugMsg("mainScript ---" & return & Â
+			"fullAccessCredentials: " & htcBasic's coerceToString(fullAccessCredentials) & return & Â
+			"userCredentials: " & htcBasic's coerceToString(userCredentials))
+		
+		
+		-- ensure credentials are not outdated
+		credentialsLib's credentialsEnsure({})
+		
+		
+		-- prompt user what to do
+		return runProcess({})
 	on error errMsg number errNum
 		tell it to activate
 		tell application "htcLib" to set errStack to replaceSimple({sourceTEXT:errMsg, oldChars:" - ", newChars:return})
@@ -108,6 +121,7 @@ end launchHtcLib
 on promptProcess(prefs)
 	-- user user for which process to do
 	
+	-- 2017-10-17 ( eshagdar ): add expiration TS to prompt.
 	-- 2017-06-28 ( eshagdar ): created
 	
 	set defaultPrefs to {processList:{}}
@@ -115,7 +129,7 @@ on promptProcess(prefs)
 	
 	try
 		if logging then htcBasic's logToConsole("About to ask user to process")
-		set promptProcessDialog to (choose from list processList of prefs with title AppletName with prompt "Select a process" OK button name "Run" without multiple selections allowed and empty selection allowed)
+		set promptProcessDialog to (choose from list processList of prefs with title AppletName with prompt "Creds expire: " & time string of (credentialsUpdatedTS + credentialsTimeout) & return & return & "Select a process to run:" OK button name "Run" without multiple selections allowed and empty selection allowed)
 		if promptProcessDialog is false then return promptProcessDialog
 		set processName to item 1 of promptProcessDialog
 		if logging then htcBasic's logToConsole("Process: " & processName)
@@ -131,6 +145,7 @@ end promptProcess
 on runProcess(prefs)
 	-- run process specified by the user
 	
+	-- 2017-10-18 ( eshagdar ): added quit process
 	-- 2017-06-28 ( eshagdar ): created.
 	
 	try
@@ -138,13 +153,15 @@ on runProcess(prefs)
 			"DO NOTHING", Â
 			"Full Access Toggle", Â
 			"Db Manage", Â
+			"Functions Open", Â
 			"Security Open", Â
 			"Security Save", Â
 			"PrivSet - copy settings to other PrivSets", Â
 			"New table", Â
 			"Data Viewer", Â
 			"Clipboard Clear", Â
-			"Credentials Update"}
+			"Credentials Update", Â
+			"QUIT"}
 		
 		set oneProcess to promptProcess({processList:processList})
 		if oneProcess is equal to "DO NOTHING" or oneProcess is equal to false then
@@ -152,30 +169,39 @@ on runProcess(prefs)
 			
 			
 		else if oneProcess is equal to "Full Access Toggle" then
-			return fullAccessToggle({})
+			fullAccessToggle({})
 			
 			
 		else if oneProcess is equal to "Db Manage" then
-			display dialog "This process is not yet finished" with title AppletName buttons "OK" default button "OK"
-			return true
+			set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
+			tell application "htcLib"
+				fmGUI_Menu_OpenDB({})
+				windowWaitUntil({windowName:"Manage Database for", whichWindow:"front", windowNameTest:"does not contain", waitCycleDelaySeconds:1, waitCycleMax:30 * minutes})
+			end tell
+			if modeSwitch of fullAccessToggle then fullAccessToggle({})
+			
+			
+		else if oneProcess is equal to "Functions Open" then
+			fullAccessToggle({ensureMode:"full"})
+			tell application "htcLib" to return fmGUI_CustomFunctions_Open({})
 			
 			
 		else if oneProcess is equal to "Security Open" then
-			tell application "htcLib"
-				fmGUI_AppFrontMost()
-				return fmGUI_ManageSecurity_GoToTab_PrivSets(fullAccessCredentials)
-			end tell
+			fullAccessToggle({ensureMode:"full"})
+			tell application "htcLib" to return fmGUI_ManageSecurity_GoToTab_PrivSets(fullAccessCredentials)
 			
 			
 		else if oneProcess is equal to "Security Save" then
 			tell application "htcLib"
 				fmGUI_AppFrontMost()
-				return fmGUI_ManageSecurity_Save(fullAccessCredentials)
+				tell application "htcLib" to return fmGUI_ManageSecurity_Save(fullAccessCredentials)
 			end tell
 			
 			
 		else if oneProcess is equal to "PrivSet - copy settings to other PrivSets" then
-			return privSetLib's copyPrivSetToOthers({})
+			set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
+			privSetLib's copyPrivSetToOthers({})
+			if modeSwitch of fullAccessToggle then fullAccessToggle({})
 			
 			
 		else if oneProcess is equal to "New table" then
@@ -184,8 +210,7 @@ on runProcess(prefs)
 			
 			
 		else if oneProcess is equal to "Data Viewer" then
-			display dialog "This process is not yet finished" with title AppletName buttons "OK" default button "OK"
-			return true
+			tell application "htcLib" to return fmGUI_DataViewer_Open(fullAccessCredentials)
 			
 			
 		else if oneProcess is equal to "Clipboard Clear" then
@@ -195,6 +220,11 @@ on runProcess(prefs)
 			
 		else if oneProcess is equal to "Credentials Update" then
 			return credentialsLib's credentialsUpdate(fullAccessCredentials & userCredentials)
+			
+			
+		else if oneProcess is equal to "QUIT" then
+			credentialsLib's credentialsCheck({forceClear:true})
+			continue quit
 			
 			
 		else
@@ -208,123 +238,12 @@ end runProcess
 
 
 
--- ########## ########## ##########
--- ##########   credentials   ##########
--- ########## ########## ##########
-
-
-
-
-on credentialsCheck(prefs)
-	-- clear credentials if past the timeout
-	
-	-- 2017-10-10 ( eshagdar ): added forceClear option.
-	-- 2017-05-03 ( eshagdar ): first created.
-	
-	try
-		set defaultPrefs to {forceClear:false}
-		set prefs to prefs & defaultPrefs
-		
-		set resetTime to (current date) - credentialsTimeout
-		
-		if forceClear of prefs then
-			set fullAccessCredentials to {}
-			set userCredentials to {}
-			set credentialsUpdatedTS to resetTime
-			(*
-			htcBasic's debugMsg("001 - " & Â
-				"fullAccessCredentials: " & htcBasic's coerceToString(fullAccessCredentials) & return & Â
-				"userCredentials: " & htcBasic's coerceToString(userCredentials) & return & Â
-				"fullAccessCredentials of privSetLib: " & htcBasic's coerceToString(fullAccessCredentials of privSetLib))
-			*)
-			
-		else if resetTime > credentialsUpdatedTS then
-			try
-				set fullAccessCredentials to {fullAccessAccountName:fullAccessAccountName of fullAccessCredentials}
-				set userCredentials to {userAccountName:userAccountName of userCredentials}
-			on error
-				set fullAccessCredentials to {}
-				set userCredentials to {}
-			end try
-			set credentialsUpdatedTS to resetTime
-			
-		end if
-		
-		return true
-	on error errMsg number errNum
-		error "unable to credentialsCheck - " & errMsg number errNum
-	end try
-end credentialsCheck
-
-
-
-on credentialsEnsure(prefs)
-	-- ensure credentials are set
-	
-	-- 2017-05-03 ( eshagdar ): first created.
-	
-	try
-		credentialsCheck({})
-		
-		try
-			set credentialsList to {fullAccessCredentials, userCredentials}
-			repeat with i from 1 to count of credentialsList
-				set oneCredential to item i of credentialsList
-				if length of oneCredential is 0 or oneCredential is "" then error "empty credentail [ " & i & " ]"
-			end repeat
-		on error errMsg number errNum
-			credentialsLib's credentialsUpdate(fullAccessCredentials & userCredentials)
-		end try
-		
-		return true
-	on error errMsg number errNum
-		error "unable to credentialsEnsure - " & errMsg number errNum
-	end try
-	return false
-end credentialsEnsure
-
-
-
 on fullAccessToggle(prefs)
-	-- toggle between full-access and regular user level
+	-- wrapper for htcLib handler that toggles between full access and user account
 	
-	-- 2017-10-06 ( eshagdar ): created
-	
+	-- 2017-10-17 ( eshagdar ): moved function into htcLib and converted this to a wrapper
 	try
-		tell application "htcLib" to set isAlreadyInFullAccess to fmGUI_isInFullAccessMode({})
-		if logging then htcBasic's logToConsole("START: full access toggle")
-		
-		if isAlreadyInFullAccess then
-			-- LEAVE full access
-			
-			if logging then htcBasic's logToConsole("DONE: already full, so LEAVE")
-			tell application "System Events"
-				tell process "FileMaker Pro"
-					set windowNames to name of every window
-				end tell
-			end tell
-			
-			if windowNames contains "Full Access" then
-				tell application "FileMaker Pro Advanced"
-					do script (first FileMaker script whose name contains "Full Access Switch OFF")
-				end tell
-				tell application "htcLib" to fmGUI_relogin({accountName:userAccountName of userCredentials, pwd:userPassword of userCredentials})
-			end if
-			
-		else
-			-- enter full access
-			
-			if logging then htcBasic's logToConsole("DONE: enter full")
-			tell application "FileMaker Pro Advanced"
-				do script (first FileMaker script whose name contains "Full Access Switch ON")
-			end tell
-			tell application "htcLib" to fmGUI_relogin({accountName:fullAccessAccountName of fullAccessCredentials, pwd:fullAccessPassword of fullAccessCredentials})
-			
-		end if
-		
-		if logging then htcBasic's logToConsole("DONE: full access toggle")
-		
-		return true
+		tell application "htcLib" to return fmGUI_fullAccessToggle(prefs & fullAccessCredentials & userCredentials)
 	on error errMsg number errNum
 		error "unable to fullAccessToggle - " & errMsg number errNum
 	end try
