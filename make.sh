@@ -1,3 +1,12 @@
+#! /bin/sh# make
+#
+# make HTC sous-dev app
+#
+# NYHTC. 
+# 
+# 2017-10-20 ( eshagdar ): created
+
+
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 INFO_FILE="Info.plist"
@@ -50,9 +59,3 @@ done
 # for ONE_LIB_TO_REMOVE in "$ADDED_LIBRARIES[*]"; do
 # 	echo "$ONE_LIB_TO_REMOVE"
 # done
-
-
-# recompile htcLib
-HTCLIB_DIR="$( osascript -e 'tell application "Finder" to return POSIX path of (folder of (path to application "htcLib") as string)')"
-. "$HTCLIB_DIR/recompile.sh"
-echo "you must re-allow assistive devices to 'HTC soux-dev'."
