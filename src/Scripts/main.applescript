@@ -20,7 +20,7 @@ property orgNumLIST : {1, 2}
 
 property idleTime : 5 * minutes
 
-property credentialsTimeout : 2 * minutes --2 * hours
+property credentialsTimeout : 2 * hours
 property credentialsUpdatedTS : (current date) - credentialsTimeout
 property fullAccessCredentials : {}
 property userCredentials : {}

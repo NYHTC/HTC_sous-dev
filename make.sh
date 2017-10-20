@@ -29,6 +29,7 @@ done
 
 
 # compile app
+osascript -e 'tell application "HTC sous-dev" to quit'
 if [ ! -f "$APP_PATH" ]; then $(rm -rf "$APP_PATH"); fi
 $(osacompile -s -o "$APP_PATH" "$SRC_MAIN_SCRIPT")
 
@@ -49,3 +50,9 @@ done
 # for ONE_LIB_TO_REMOVE in "$ADDED_LIBRARIES[*]"; do
 # 	echo "$ONE_LIB_TO_REMOVE"
 # done
+
+
+# recompile htcLib
+HTCLIB_DIR="$( osascript -e 'tell application "Finder" to return POSIX path of (folder of (path to application "htcLib") as string)')"
+. "$HTCLIB_DIR/recompile.sh"
+echo "you must re-allow assistive devices to 'HTC soux-dev'."
