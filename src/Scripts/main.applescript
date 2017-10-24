@@ -69,8 +69,11 @@ on mainScript(prefs)
 	try
 		-- pick up prefs, if specified
 		set defaultPrefs to {null}
-		if class of prefs is script or prefs is equal to {} then set prefs to defaultPrefs
-		
+		try
+			if class of prefs is script or prefs is equal to {} then set prefs to defaultPrefs
+		on error
+			set prefs to defaultPrefs
+		end try
 		
 		-- launch htcLib
 		launchHtcLib({})
