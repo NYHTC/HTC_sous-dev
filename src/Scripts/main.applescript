@@ -258,12 +258,12 @@ on process_manageDB(prefs)
 	
 	
 	try
-		set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
+		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
 		tell application "htcLib"
 			fmGUI_Menu_OpenDB({})
 			windowWaitUntil({windowName:"Manage Database for", whichWindow:"front", windowNameTest:"does not contain", waitCycleDelaySeconds:1, waitCycleMax:30 * minutes})
 		end tell
-		if modeSwitch of fullAccessToggle then fullAccessToggle({})
+		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
 		
 		return true
 	on error errMsg number errNum
@@ -330,9 +330,9 @@ on process_PrivSetCopy(prefs)
 	
 	
 	try
-		set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
+		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
 		privSetLib's copyPrivSetToOthers({})
-		if modeSwitch of fullAccessToggle then fullAccessToggle({})
+		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
 	on error errMsg number errNum
 		error "unable to process_PrivSetCopy - " & errMsg number errNum
 	end try
