@@ -1,0 +1,3 @@
+- open manage db should stop if there are unsaved scripts
+- manage DB should make 1st non-script/data viewer/debugger window open be frontmost
+- process to authenticate - useful when logging in

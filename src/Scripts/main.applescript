@@ -12,6 +12,8 @@
 
 
 property AppletName : "HTC sous-dev"
+property htcLibURL : "https://github.com/NYHTC/applescript-fm-helper"
+
 
 property debugMode : false
 property logging : false
@@ -34,38 +36,42 @@ use scripting additions
 
 
 
-on run
-	try
-		if logging then htcBasic's logToConsole("Here I am")
-		mainScript({})
-	on error errMsg number errNum
-		tell it to activate
-		display dialog errMsg & ", errNum: " & errNum
-	end try
-	
+on run prefs
+	if logging then htcBasic's logToConsole("Here I am")
+	mainScript(prefs)
 end run
 
 
-on reopen
-	mainScript({})
+on reopen prefs
+	mainScript(prefs)
 end reopen
 
 
 on idle
 	credentialsLib's credentialsCheck({})
-	return idleTime
+	return idleTime -- sets idle time to specified time ( instead of the default of 30 seconds )
 end idle
 
 
 on quit
-	credentialsLib's credentialsCheck({forceClear:true})
-	continue quit
+	process_quit({})
 end quit
 
 
 
 on mainScript(prefs)
+	-- main script to determine what to run
+	
+	-- 2017-10-23 ( eshagdar ): added prefs. moved processes into separate handlers.
+	-- 2017-xx-xx ( eshagdar ): created
+	
+	
 	try
+		-- pick up prefs, if specified
+		set defaultPrefs to {null}
+		if class of prefs is script or prefs is equal to {} then set prefs to defaultPrefs
+		
+		
 		-- launch htcLib
 		launchHtcLib({})
 		
@@ -81,7 +87,8 @@ on mainScript(prefs)
 		
 		
 		-- prompt user what to do
-		return runProcess({})
+		set process to item 1 of prefs
+		return runProcess({process:process})
 	on error errMsg number errNum
 		tell it to activate
 		tell application "htcLib" to set errStack to replaceSimple({sourceTEXT:errMsg, oldChars:" - ", newChars:return})
@@ -103,15 +110,15 @@ on launchHtcLib(prefs)
 	
 	-- 2017-06-28 ( eshagdar ): create
 	
+	
 	set openName to "Get it!"
-	set repoURL to "https://github.com/NYHTC/applescript-fm-helper"
 	
 	try
 		if logging then htcBasic's logToConsole("launching htcLib")
 		tell application "htcLib" to launch
 	on error errMsg number errNum
 		set missingAppDialog to display dialog "You do Not have the htcLib installed." with title AppletName buttons {"Cancel", openName} default button openName
-		if button returned of missingAppDialog is openName then open location repoURL
+		if button returned of missingAppDialog is openName then open location htcLibURL
 		error "unable to launchHtcLib - " & errMsg number errNum
 	end try
 end launchHtcLib
@@ -123,6 +130,7 @@ on promptProcess(prefs)
 	
 	-- 2017-10-17 ( eshagdar ): add expiration TS to prompt.
 	-- 2017-06-28 ( eshagdar ): created
+	
 	
 	set defaultPrefs to {processList:{}}
 	set prefs to prefs & defaultPrefs
@@ -148,6 +156,7 @@ on runProcess(prefs)
 	-- 2017-10-18 ( eshagdar ): added quit process
 	-- 2017-06-28 ( eshagdar ): created.
 	
+	
 	try
 		set processList to {Â
 			"DO NOTHING", Â
@@ -162,46 +171,35 @@ on runProcess(prefs)
 			"Clipboard Clear", Â
 			"Credentials Update", Â
 			"QUIT"}
-		
 		set oneProcess to promptProcess({processList:processList})
+		
+		
 		if oneProcess is equal to "DO NOTHING" or oneProcess is equal to false then
 			return true
 			
 			
 		else if oneProcess is equal to "Full Access Toggle" then
-			fullAccessToggle({})
+			return process_fullAccessToggle({})
 			
 			
 		else if oneProcess is equal to "Db Manage" then
-			set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
-			tell application "htcLib"
-				fmGUI_Menu_OpenDB({})
-				windowWaitUntil({windowName:"Manage Database for", whichWindow:"front", windowNameTest:"does not contain", waitCycleDelaySeconds:1, waitCycleMax:30 * minutes})
-			end tell
-			if modeSwitch of fullAccessToggle then fullAccessToggle({})
+			return process_manageDB({})
 			
 			
 		else if oneProcess is equal to "Functions Open" then
-			fullAccessToggle({ensureMode:"full"})
-			tell application "htcLib" to return fmGUI_CustomFunctions_Open({})
+			return process_functionsOpen({})
 			
 			
 		else if oneProcess is equal to "Security Open" then
-			fullAccessToggle({ensureMode:"full"})
-			tell application "htcLib" to return fmGUI_ManageSecurity_GoToTab_PrivSets(fullAccessCredentials)
+			return process_securityOpen({})
 			
 			
 		else if oneProcess is equal to "Security Save" then
-			tell application "htcLib"
-				fmGUI_AppFrontMost()
-				tell application "htcLib" to return fmGUI_ManageSecurity_Save(fullAccessCredentials)
-			end tell
+			return process_securitySave({})
 			
 			
 		else if oneProcess is equal to "PrivSet - copy settings to other PrivSets" then
-			set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
-			privSetLib's copyPrivSetToOthers({})
-			if modeSwitch of fullAccessToggle then fullAccessToggle({})
+			return process_PrivSetCopy({})
 			
 			
 		else if oneProcess is equal to "New table" then
@@ -210,27 +208,24 @@ on runProcess(prefs)
 			
 			
 		else if oneProcess is equal to "Data Viewer" then
-			tell application "htcLib" to return fmGUI_DataViewer_Open(fullAccessCredentials)
+			return process_dataViewerOpen({})
 			
 			
 		else if oneProcess is equal to "Clipboard Clear" then
-			set the clipboard to null
-			return true
+			return process_ClipboardClear({})
 			
 			
 		else if oneProcess is equal to "Credentials Update" then
-			return credentialsLib's credentialsUpdate(fullAccessCredentials & userCredentials)
+			return process_credentialsUpdate({})
 			
 			
 		else if oneProcess is equal to "QUIT" then
-			credentialsLib's credentialsCheck({forceClear:true})
-			continue quit
+			return process_quit({})
 			
 			
 		else
-			return false
+			error "unknown process '" & oneProcess & "'" number -1024
 		end if
-		
 	on error errMsg number errNum
 		error "unable to runProcess - " & errMsg number errNum
 	end try
@@ -238,15 +233,166 @@ end runProcess
 
 
 
-on fullAccessToggle(prefs)
+on process_fullAccessToggle(prefs)
 	-- wrapper for htcLib handler that toggles between full access and user account
 	
 	-- 2017-10-17 ( eshagdar ): moved function into htcLib and converted this to a wrapper
+	
+	
 	try
 		tell application "htcLib" to return fmGUI_fullAccessToggle(prefs & fullAccessCredentials & userCredentials)
 	on error errMsg number errNum
-		error "unable to fullAccessToggle - " & errMsg number errNum
+		error "unable to process_fullAccessToggle - " & errMsg number errNum
 	end try
-end fullAccessToggle
+end process_fullAccessToggle
 
 
+
+on process_manageDB(prefs)
+	-- wrapper for opening manage DB
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
+		tell application "htcLib"
+			fmGUI_Menu_OpenDB({})
+			windowWaitUntil({windowName:"Manage Database for", whichWindow:"front", windowNameTest:"does not contain", waitCycleDelaySeconds:1, waitCycleMax:30 * minutes})
+		end tell
+		if modeSwitch of fullAccessToggle then fullAccessToggle({})
+		
+		return true
+	on error errMsg number errNum
+		error "unable to process_manageDB - " & errMsg number errNum
+	end try
+end process_manageDB
+
+
+
+on process_functionsOpen(prefs)
+	-- wrapper for opening custom functions
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		fullAccessToggle({ensureMode:"full"})
+		tell application "htcLib" to return fmGUI_CustomFunctions_Open({})
+	on error errMsg number errNum
+		error "unable to process_functionsOpen - " & errMsg number errNum
+	end try
+end process_functionsOpen
+
+
+
+on process_securityOpen(prefs)
+	-- wrapper for opening security
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		fullAccessToggle({ensureMode:"full"})
+		tell application "htcLib" to return fmGUI_ManageSecurity_GoToTab_PrivSets(fullAccessCredentials)
+	on error errMsg number errNum
+		error "unable to process_securityOpen - " & errMsg number errNum
+	end try
+end process_securityOpen
+
+
+
+on process_securitySave(prefs)
+	-- wrapper for saving security
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		tell application "htcLib"
+			fmGUI_AppFrontMost()
+			return fmGUI_ManageSecurity_Save(fullAccessCredentials)
+		end tell
+	on error errMsg number errNum
+		error "unable to process_securitySave - " & errMsg number errNum
+	end try
+end process_securitySave
+
+
+
+on process_PrivSetCopy(prefs)
+	-- wrapper for copying a selected privSet
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
+		privSetLib's copyPrivSetToOthers({})
+		if modeSwitch of fullAccessToggle then fullAccessToggle({})
+	on error errMsg number errNum
+		error "unable to process_PrivSetCopy - " & errMsg number errNum
+	end try
+end process_PrivSetCopy
+
+
+
+on process_dataViewerOpen(prefs)
+	-- wrapper for opening the data viewer
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		tell application "htcLib" to return fmGUI_DataViewer_Open(fullAccessCredentials)
+	on error errMsg number errNum
+		error "unable to process_dataViewerOpen - " & errMsg number errNum
+	end try
+end process_dataViewerOpen
+
+
+
+on process_ClipboardClear(prefs)
+	-- wrapper for clearing the clipboard
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		set the clipboard to null
+		return true
+	on error errMsg number errNum
+		error "unable to process_ClipboardClear - " & errMsg number errNum
+	end try
+end process_ClipboardClear
+
+
+
+on process_credentialsUpdate(prefs)
+	-- wrapper for updating credentials
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		return credentialsLib's credentialsUpdate(fullAccessCredentials & userCredentials)
+	on error errMsg number errNum
+		error "unable to process_credentialsUpdate - " & errMsg number errNum
+	end try
+end process_credentialsUpdate
+
+
+
+on process_quit(prefs)
+	-- wrapper for quiting applet
+	
+	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
+	
+	
+	try
+		credentialsLib's credentialsCheck({forceClear:true})
+		continue quit
+	on error errMsg number errNum
+		error "unable to process_quit - " & errMsg number errNum
+	end try
+end process_quit
