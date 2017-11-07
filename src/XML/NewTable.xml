@@ -1,0 +1,428 @@
+<fmxmlsnippet type="FMObjectList">
+	<BaseTable name="||FULL_TABLE_NAME||">
+		<Field id="1" dataType="Number" fieldType="Normal" name="||__pk__||">
+			<Comment></Comment>
+			<AutoEnter allowEditing="False" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[UniqueID]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="2" dataType="Number" fieldType="Calculated" name="___TABLE_COMMENT___">
+			<Comment></Comment>
+			<AutoEnter alwaysEvaluate="False"></AutoEnter>
+			<Storage storeCalculationResults="False" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="3" dataType="Number" fieldType="Normal" name="zAuto1">
+			<Comment>Auto-enter 1. To be used for various matching.</Comment>
+			<AutoEnter allowEditing="True" value="ConstantData" constant="True" furigana="False" lookup="False" calculation="False">
+				<ConstantData>1</ConstantData>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="4" dataType="Number" fieldType="Calculated" name="zAutoOrgMATCH">
+			<Calculation table="||FULL_TABLE_NAME||"><![CDATA[zAutoOrgNum = SessionOrgNum ( "" )]]></Calculation>
+			<Comment></Comment>
+			<AutoEnter alwaysEvaluate="False"></AutoEnter>
+			<Storage storeCalculationResults="False" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="5" dataType="Number" fieldType="Normal" name="zAutoOrgNum">
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="False" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[SessionOrgNum ( "" )]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="6" dataType="Text" fieldType="Calculated" name="zAutoSpace">
+			<Calculation table="||FULL_TABLE_NAME||"><![CDATA[" "]]></Calculation>
+			<Comment></Comment>
+			<AutoEnter alwaysEvaluate="False"></AutoEnter>
+			<Storage storeCalculationResults="False" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="7" dataType="Number" fieldType="Calculated" name="zCalcRecID">
+			<Calculation table="||FULL_TABLE_NAME||"><![CDATA[Get ( RecordID )]]></Calculation>
+			<Comment></Comment>
+			<AutoEnter alwaysEvaluate="True"></AutoEnter>
+			<Storage storeCalculationResults="False" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="8" dataType="Text" fieldType="Normal" name="zCrAcct">
+			<Comment>Creation Account.</Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[Get ( AccountName )]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="Minimal" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="9" dataType="Text" fieldType="Normal" name="zCrNm">
+			<Comment>Creation Name.</Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[Get ( UserName )]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="None" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="10" dataType="Text" fieldType="Normal" name="zCrScript">
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[List ( 
+	Get ( ScriptName );
+	$CallingScriptName
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="False" index="Minimal" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="11" dataType="TimeStamp" fieldType="Normal" name="zCrTStmp">
+			<Comment>Creation TimeStamp</Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[Get ( CurrentHostTimeStamp )]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="12" dataType="Number" fieldType="Calculated" name="zFoundCount">
+			<Calculation table="||FULL_TABLE_NAME||"><![CDATA[Get ( FoundCount )]]></Calculation>
+			<Comment></Comment>
+			<AutoEnter alwaysEvaluate="False"></AutoEnter>
+			<Storage storeCalculationResults="False" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="13" dataType="Text" fieldType="Normal" name="zModAcct">
+			<Comment>Modification Account.</Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* version 1.1 */
+Let ( [ 
+		trigger = zzAudit_ModTrigger 
+	]; 
+	If ( Audit_RetainSelf or $$__NO_MOD_AUTO_ENTER__ or $__NO_MOD_AUTO_ENTER__ ;
+		Self ;
+		Get ( AccountName ) 
+	) 
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="14" dataType="Text" fieldType="Normal" name="zModNm">
+			<Comment>Modification Name</Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* version 1.1 */
+Let ( [ 
+		trigger = zzAudit_ModTrigger 
+	]; 
+	If ( Audit_RetainSelf or $$__NO_MOD_AUTO_ENTER__ or $__NO_MOD_AUTO_ENTER__ ;
+		Self ;
+		Get ( UserName ) 
+	) 
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="None" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="15" dataType="Text" fieldType="Normal" name="zModScript">
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* version 1.2 */
+Let ( [ 
+		trigger = zzAudit_ModTrigger 
+	]; 
+	If ( Audit_RetainSelf or $$__NO_MOD_AUTO_ENTER__ or $__NO_MOD_AUTO_ENTER__ ;
+		Self ;
+		Get ( ScriptName ) 
+	) 
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="None" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="16" dataType="TimeStamp" fieldType="Normal" name="zModTStmp">
+			<Comment>Modification TimeStamp</Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* version 1.1 */
+Let ( [ 
+		trigger = zzAudit_ModTrigger 
+	]; 
+	If ( Audit_RetainSelf or $$__NO_MOD_AUTO_ENTER__ or $__NO_MOD_AUTO_ENTER__ ;
+		Self ;
+		Get ( CurrentHostTimeStamp ) 
+	) 
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="17" dataType="Number" fieldType="Normal" name="zRecordID">
+			<Comment></Comment>
+			<AutoEnter allowEditing="False" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[Get ( RecordID )]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="18" dataType="Number" fieldType="Summary" name="zSumAuto1">
+			<SummaryInfo restartForEachSortedGroup="False" summarizeRepetition="Together" operation="Total">
+				<SummaryField>
+					<Field id="19" name="zAuto1"></Field>
+				</SummaryField>
+			</SummaryInfo>
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" constant="False" furigana="False" lookup="False" calculation="False">
+				<ConstantData></ConstantData>
+			</AutoEnter>
+		</Field>
+		<Field id="20" dataType="Text" fieldType="Normal" name="zTableNm">
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="False" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* version 1.0 */
+GetValue ( 
+	Substitute ( 
+		GetFieldName ( Self ); 
+		[ "::"; "¶" ] 
+	); 
+	1 
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="Minimal" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="21" dataType="Number" fieldType="Normal" name="SyncDeK_pubFlag">
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* 
+	version 1.1
+
+	This field is used by SyncServer to collect new and modified records (those containing a 1)
+
+
+HISTORY:
+	1.1 - 2016-07-07 ( eshagdar ): replaced test with Audit_RetainSelf function
+	1.0 - 201x-xx-xx ( xxxxx ): first created
+*/
+
+
+Let ( [
+		trigger = zzAudit_ModTrigger
+	];
+	Case ( 
+		Audit_RetainSelf or $$audit_unflagPubFlag = True ;
+		0 ;
+
+		5 > SyncDeK_pubFlag and SyncDeK_pubFlag > 0 and not IsEmpty ( SyncDeK_pubFlag ) ;
+		SyncDeK_pubFlag ;
+
+		1 
+	) 
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="22" dataType="Text" fieldType="Normal" name="zzAudit_ModAccount">
+			<Comment></Comment>
+			<AutoEnter allowEditing="False" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* 
+	version 1.3
+
+	name of the account modifying the record
+
+
+HISTORY:
+	1.3 - 2016-10-28 ( eshagdar ): changed not to isempty 
+	1.2 - 2016-10-25 ( eshagdar ): added $_IMPORT_RetainAutoEnterFields
+	1.1 - 2016-07-07 ( eshagdar ): replaced test with Audit_RetainSelf function
+	1.0 - 201x-xx-xx ( xxxxx ): first created
+*/
+
+
+Let ( [
+		trigger = zzAudit_ModTrigger 
+	]; 
+	If ( Audit_RetainSelf and isempty ( $_IMPORT_RetainAutoEnterFields );
+		Self ;
+		Get ( AccountName ) 
+	) 
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="None" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="23" dataType="TimeStamp" fieldType="Normal" name="zzAudit_ModTrigger">
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" value="ModificationTimeStamp" constant="False" furigana="False" lookup="False" calculation="False">
+				<ConstantData></ConstantData>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="None" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="24" dataType="TimeStamp" fieldType="Normal" name="zzAudit_ModTS">
+			<Comment>Trigger timestamp for SyncServer process.</Comment>
+			<AutoEnter allowEditing="False" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* 
+	version 1.3
+
+	timestamp of when the record is last modified
+
+
+HISTORY:
+	1.3 - 2016-10-28 ( eshagdar ): changed not to isempty 
+	1.2 - 2016-10-25 ( eshagdar ): added $_IMPORT_RetainAutoEnterFields
+	1.1 - 2016-07-07 ( eshagdar ): replaced test with Audit_RetainSelf function
+	1.0 - 201x-xx-xx ( xxxxx ): first created
+*/
+
+
+Let ( [
+		trigger = zzAudit_ModTrigger 
+	]; 
+	If ( Audit_RetainSelf and isempty ( $_IMPORT_RetainAutoEnterFields );
+		Self ;
+		Get ( CurrentHostTimeStamp ) 
+	)
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="True" type="Always">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="True"></StrictValidation>
+			</Validation>
+			<Storage autoIndex="True" index="None" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+		<Field id="25" dataType="Number" fieldType="Normal" name="zzAudit_UUID">
+			<Comment></Comment>
+			<AutoEnter allowEditing="True" overwriteExistingValue="True" alwaysEvaluate="False" constant="False" furigana="False" lookup="False" calculation="True">
+				<ConstantData></ConstantData>
+				<Calculation table="||FULL_TABLE_NAME||"><![CDATA[/* 
+	version 1.2
+
+	This calc can be simplied to just: Sync_GetUUID if you make sure all pre-existing records are 
+	populated with valid ids and ensure that future records do not get created without a valid id 
+	(i.e. through record import with auto-entry off).
+
+
+HISTORY:
+	1.3 - 2016-10-28 ( eshagdar ): changed not to isempty 
+	1.2 - 2016-10-25 ( eshagdar ): added $_IMPORT_RetainAutoEnterFields
+	1.1 - 2016-07-07 ( eshagdar ): replaced test with Audit_RetainSelf function
+	1.0 - 201x-xx-xx ( xxxxx ): first created
+*/
+
+
+Let ( [
+		zzAudit_UUID = UniqueID (  )
+	];
+	If ( Audit_RetainSelf and isempty ( $_IMPORT_RetainAutoEnterFields );
+		If ( IsEmpty ( Self ) or Self = "?" ;
+			zzAudit_UUID ;
+			Self 
+		);
+		zzAudit_UUID
+	)
+)]]></Calculation>
+			</AutoEnter>
+			<Validation message="False" maxLength="False" valuelist="False" calculation="False" alwaysValidateCalculation="False" type="OnlyDuringDataEntry">
+				<NotEmpty value="False"></NotEmpty>
+				<Unique value="False"></Unique>
+				<Existing value="False"></Existing>
+				<StrictValidation value="False"></StrictValidation>
+			</Validation>
+			<Storage index="All" indexLanguage="English" global="False" maxRepetition="1"></Storage>
+		</Field>
+	</BaseTable>
+</fmxmlsnippet>

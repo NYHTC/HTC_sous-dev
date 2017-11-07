@@ -40,7 +40,7 @@ on debugMsg(msg)
 		
 		return showDialog({msg:msg, title:AppletName & " DEBUG"})
 	on error errMsg number errNum
-		error "unable to showDialog - " & errMsg number errNum
+		error "unable to debugMsg - " & errMsg number errNum
 	end try
 end debugMsg
 
@@ -55,24 +55,44 @@ on showUserError(msg)
 		
 		return showDialog({msg:msg, title:AppletName & " ERROR"})
 	on error errMsg number errNum
-		error "unable to showDialog - " & errMsg number errNum
+		error "unable to showUserError - " & errMsg number errNum
 	end try
 end showUserError
+
+
+on promptUser(msg)
+	-- wrapper handler
+	
+	-- 2017-11-01 ( eshagdar ): created.
+	
+	try
+		global AppletName
+		
+		return showDialog({msg:msg, title:AppletName, shouldPrompt:true})
+	on error errMsg number errNum
+		error "unable to promptUser - " & errMsg number errNum
+	end try
+end promptUser
 
 
 on showDialog(prefs)
 	-- show the user a dialog
 	
+	-- 2017-11-01 ( eshagdar ): added option to prompt user for an answer
 	-- 2017-10-10 ( eshagdar ): created.
 	
 	try
 		global AppletName
 		
-		set defaultPrefs to {msg:null, title:AppletName, buttonList:{"OK"}}
+		set defaultPrefs to {msg:null, title:AppletName, buttonList:{"OK", "Cancel"}, shouldPrompt:false, answer:""}
 		set prefs to prefs & defaultPrefs
 		
 		tell it to activate
-		return display dialog coerceToString(msg of prefs) with title title of prefs buttons (buttonList of prefs) default button item 1 of buttonList of prefs
+		if shouldPrompt of prefs or answer of prefs is not equal to "" then
+			return display dialog coerceToString(msg of prefs) with title title of prefs default answer (answer of prefs) buttons (buttonList of prefs) default button item 1 of buttonList of prefs
+		else
+			return display dialog coerceToString(msg of prefs) with title title of prefs buttons (buttonList of prefs) default button item 1 of buttonList of prefs
+		end if
 	on error errMsg number errNum
 		error "unable to showDialog - " & errMsg number errNum
 	end try
@@ -113,8 +133,8 @@ on coerceToString(incomingObject)
 			
 			
 		on error errMsg
-			if errMsg starts with "System Events got an error: Canâ€™t make some_UUID_Property_54F827C7379E4073B5A216BB9CDE575D of " and errMsg ends with "into type specifier." then
-				set errMsgLead to "System Events got an error: Canâ€™t make some_UUID_Property_54F827C7379E4073B5A216BB9CDE575D of "
+			if errMsg starts with "System Events got an error: CanÕt make some_UUID_Property_54F827C7379E4073B5A216BB9CDE575D of " and errMsg ends with "into type specifier." then
+				set errMsgLead to "System Events got an error: CanÕt make some_UUID_Property_54F827C7379E4073B5A216BB9CDE575D of "
 				set errMsgTrail to " into type specifier."
 				
 				set {od, AppleScript's text item delimiters} to {AppleScript's text item delimiters, errMsgLead}

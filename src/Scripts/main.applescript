@@ -4,6 +4,7 @@
 -- written against OS X 10.10.5 and FileMaker 15.0.3
 
 (*
+	2017-11-02 ( eshagdar ): pass prefs thru to sub-handlers. enabled new table process. added 'database' script library
 	2017-10-19 ( eshagdar ): open data viewer. open manage DB. 'added Functions Open' process
 	2017-10-17 ( eshagdar ): update 'promptProcess' to show credential expiration TS.
 	2017-10-16 ( eshagdar ): converted app to source files.
@@ -12,6 +13,7 @@
 
 
 property AppletName : "HTC sous-dev"
+property appPath : ""
 property htcLibURL : "https://github.com/NYHTC/applescript-fm-helper"
 
 
@@ -27,11 +29,16 @@ property credentialsUpdatedTS : (current date) - credentialsTimeout
 property fullAccessCredentials : {}
 property userCredentials : {}
 
+property newTableAndFields : "NewTable.xml"
+property fmObjTrans : ""
+
+
 
 
 use htcBasic : script "htcBasic"
 use credentialsLib : script "credentials"
 use privSetLib : script "privSet"
+use database : script "database"
 use scripting additions
 
 
@@ -62,6 +69,7 @@ end quit
 on mainScript(prefs)
 	-- main script to determine what to run
 	
+	-- 2017-11-01 ( eshagdar ): don't bother showing error stack if user canceled
 	-- 2017-10-23 ( eshagdar ): added prefs. moved processes into separate handlers.
 	-- 2017-xx-xx ( eshagdar ): created
 	
@@ -69,11 +77,20 @@ on mainScript(prefs)
 	try
 		-- pick up prefs, if specified
 		set defaultPrefs to {null}
-		if class of prefs is script or prefs is equal to {} then set prefs to defaultPrefs
+		try
+			if class of prefs is script or prefs is equal to {} then set prefs to defaultPrefs
+		on error
+			set prefs to defaultPrefs
+		end try
 		
 		
-		-- launch htcLib
+		-- get app path
+		tell application "Finder" to set appPath to (path to me) as string
+		
+		
+		-- init dependencies
 		launchHtcLib({})
+		initFmObjTrans({})
 		
 		
 		-- credentials debugging
@@ -99,7 +116,7 @@ on mainScript(prefs)
 			-1719: assistive device
 		*)
 		if errNum is not in ignoreErrorNumList then set errStack to errStack & " ( errNum: " & errNum & " )"
-		htcBasic's showUserError(errStack)
+		if errNum is not -128 then htcBasic's showUserError(errStack)
 	end try
 end mainScript
 
@@ -122,6 +139,33 @@ on launchHtcLib(prefs)
 		error "unable to launchHtcLib - " & errMsg number errNum
 	end try
 end launchHtcLib
+
+
+
+on initFmObjTrans(prefs)
+	-- init fmObjectTranslator
+	
+	-- 2017-11-02 ( eshagdar ): created
+	
+	
+	try
+		set defaultPrefs to {}
+		set prefs to prefs & defaultPrefs
+		
+		
+		tell application "Finder"
+			set appPath to path to me as string
+		end tell
+		set fmObjPath to appPath & "Contents:Resources:Scripts:fmObjectTranslator.applescript"
+		set fmObjTrans to run script (alias fmObjPath)
+		--tell fmObjTransScript to set fmObjTrans to fmObjectTranslator_Instantiate({})
+		
+		
+		return true
+	on error errMsg number errNum
+		error "unable to initFmObjTrans - " & errMsg number errNum
+	end try
+end initFmObjTrans
 
 
 
@@ -153,6 +197,7 @@ end promptProcess
 on runProcess(prefs)
 	-- run process specified by the user
 	
+	-- 2017-11-02 ( eshagdar ): enabled create table process
 	-- 2017-10-18 ( eshagdar ): added quit process
 	-- 2017-06-28 ( eshagdar ): created.
 	
@@ -166,7 +211,7 @@ on runProcess(prefs)
 			"Security Open", Â
 			"Security Save", Â
 			"PrivSet - copy settings to other PrivSets", Â
-			"New table", Â
+			"Table Create", Â
 			"Data Viewer", Â
 			"Clipboard Clear", Â
 			"Credentials Update", Â
@@ -202,9 +247,8 @@ on runProcess(prefs)
 			return process_PrivSetCopy({})
 			
 			
-		else if oneProcess is equal to "New table" then
-			display dialog "This process is not yet finished" with title AppletName buttons "OK" default button "OK"
-			return true
+		else if oneProcess is equal to "Table Create" then
+			return process_NewTable({})
 			
 			
 		else if oneProcess is equal to "Data Viewer" then
@@ -236,6 +280,7 @@ end runProcess
 on process_fullAccessToggle(prefs)
 	-- wrapper for htcLib handler that toggles between full access and user account
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-17 ( eshagdar ): moved function into htcLib and converted this to a wrapper
 	
 	
@@ -251,16 +296,17 @@ end process_fullAccessToggle
 on process_manageDB(prefs)
 	-- wrapper for opening manage DB
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
-		set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
+		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
 		tell application "htcLib"
-			fmGUI_Menu_OpenDB({})
+			fmGUI_Menu_OpenDB(prefs)
 			windowWaitUntil({windowName:"Manage Database for", whichWindow:"front", windowNameTest:"does not contain", waitCycleDelaySeconds:1, waitCycleMax:30 * minutes})
 		end tell
-		if modeSwitch of fullAccessToggle then fullAccessToggle({})
+		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
 		
 		return true
 	on error errMsg number errNum
@@ -273,12 +319,13 @@ end process_manageDB
 on process_functionsOpen(prefs)
 	-- wrapper for opening custom functions
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
-		fullAccessToggle({ensureMode:"full"})
-		tell application "htcLib" to return fmGUI_CustomFunctions_Open({})
+		process_fullAccessToggle({ensureMode:"full"})
+		tell application "htcLib" to return fmGUI_CustomFunctions_Open(prefs)
 	on error errMsg number errNum
 		error "unable to process_functionsOpen - " & errMsg number errNum
 	end try
@@ -289,12 +336,13 @@ end process_functionsOpen
 on process_securityOpen(prefs)
 	-- wrapper for opening security
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
-		fullAccessToggle({ensureMode:"full"})
-		tell application "htcLib" to return fmGUI_ManageSecurity_GoToTab_PrivSets(fullAccessCredentials)
+		process_fullAccessToggle({ensureMode:"full"})
+		tell application "htcLib" to return fmGUI_ManageSecurity_GoToTab_PrivSets(prefs & fullAccessCredentials)
 	on error errMsg number errNum
 		error "unable to process_securityOpen - " & errMsg number errNum
 	end try
@@ -305,13 +353,14 @@ end process_securityOpen
 on process_securitySave(prefs)
 	-- wrapper for saving security
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
 		tell application "htcLib"
 			fmGUI_AppFrontMost()
-			return fmGUI_ManageSecurity_Save(fullAccessCredentials)
+			return fmGUI_ManageSecurity_Save(prefs & fullAccessCredentials)
 		end tell
 	on error errMsg number errNum
 		error "unable to process_securitySave - " & errMsg number errNum
@@ -323,13 +372,14 @@ end process_securitySave
 on process_PrivSetCopy(prefs)
 	-- wrapper for copying a selected privSet
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
-		set fullAccessToggle to fullAccessToggle({ensureMode:"full"})
-		privSetLib's copyPrivSetToOthers({})
-		if modeSwitch of fullAccessToggle then fullAccessToggle({})
+		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
+		privSetLib's copyPrivSetToOthers(prefs)
+		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
 	on error errMsg number errNum
 		error "unable to process_PrivSetCopy - " & errMsg number errNum
 	end try
@@ -337,14 +387,30 @@ end process_PrivSetCopy
 
 
 
+on process_NewTable(prefs)
+	-- create a new table
+	
+	-- 2017-11-01 ( eshagdar ): created
+	
+	
+	try
+		return database's newTable(prefs)
+	on error errMsg number errNum
+		error "unable to process_NewTable - " & errMsg number errNum
+	end try
+end process_NewTable
+
+
+
 on process_dataViewerOpen(prefs)
 	-- wrapper for opening the data viewer
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
-		tell application "htcLib" to return fmGUI_DataViewer_Open(fullAccessCredentials)
+		tell application "htcLib" to return fmGUI_DataViewer_Open(prefs & fullAccessCredentials)
 	on error errMsg number errNum
 		error "unable to process_dataViewerOpen - " & errMsg number errNum
 	end try
@@ -371,11 +437,12 @@ end process_ClipboardClear
 on process_credentialsUpdate(prefs)
 	-- wrapper for updating credentials
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
-		return credentialsLib's credentialsUpdate(fullAccessCredentials & userCredentials)
+		return credentialsLib's credentialsUpdate(prefs & fullAccessCredentials & userCredentials)
 	on error errMsg number errNum
 		error "unable to process_credentialsUpdate - " & errMsg number errNum
 	end try
@@ -386,11 +453,12 @@ end process_credentialsUpdate
 on process_quit(prefs)
 	-- wrapper for quiting applet
 	
+	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
-		credentialsLib's credentialsCheck({forceClear:true})
+		credentialsLib's credentialsCheck(prefs & {forceClear:true})
 		continue quit
 	on error errMsg number errNum
 		error "unable to process_quit - " & errMsg number errNum
