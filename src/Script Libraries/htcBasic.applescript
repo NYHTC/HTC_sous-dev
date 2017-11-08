@@ -75,21 +75,44 @@ on promptUser(msg)
 end promptUser
 
 
+on promptUserWithDefaultAnswer(prefs)
+	-- wrapper handler, contains a default answer.
+	
+	-- 2017-11-07 ( eshagdar ): created.
+	
+	try
+		set defaultPrefs to {msg:null, defaultAnswer:null}
+		set prefs to prefs & defaultPrefs
+		
+		
+		global AppletName
+		
+		
+		return showDialog({msg:msg of prefs, title:AppletName, defaultAnswer:defaultAnswer of prefs, shouldPrompt:true})
+	on error errMsg number errNum
+		error "unable to promptUser - " & errMsg number errNum
+	end try
+end promptUserWithDefaultAnswer
+
+
 on showDialog(prefs)
 	-- show the user a dialog
 	
+	-- 2017-11-08 ( eshagdar ): updated param name to defaultAnswer, init its value to an empty sting if it's null.
 	-- 2017-11-01 ( eshagdar ): added option to prompt user for an answer
 	-- 2017-10-10 ( eshagdar ): created.
 	
 	try
 		global AppletName
 		
-		set defaultPrefs to {msg:null, title:AppletName, buttonList:{"OK", "Cancel"}, shouldPrompt:false, answer:""}
+		set defaultPrefs to {msg:null, title:AppletName, buttonList:{"OK", "Cancel"}, shouldPrompt:false, defaultAnswer:""}
 		set prefs to prefs & defaultPrefs
+		set defaultAnswer to defaultAnswer of prefs
 		
 		tell it to activate
 		if shouldPrompt of prefs or answer of prefs is not equal to "" then
-			return display dialog coerceToString(msg of prefs) with title title of prefs default answer (answer of prefs) buttons (buttonList of prefs) default button item 1 of buttonList of prefs
+			if defaultAnswer is null then set defaultAnswer to ""
+			return display dialog coerceToString(msg of prefs) with title title of prefs default answer defaultAnswer buttons (buttonList of prefs) default button item 1 of buttonList of prefs
 		else
 			return display dialog coerceToString(msg of prefs) with title title of prefs buttons (buttonList of prefs) default button item 1 of buttonList of prefs
 		end if

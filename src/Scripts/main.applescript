@@ -212,6 +212,7 @@ on runProcess(prefs)
 			"Security Save", Â
 			"PrivSet - copy settings to other PrivSets", Â
 			"Table Create", Â
+			"Table Copy Security", Â
 			"Data Viewer", Â
 			"Clipboard Clear", Â
 			"Credentials Update", Â
@@ -248,7 +249,11 @@ on runProcess(prefs)
 			
 			
 		else if oneProcess is equal to "Table Create" then
-			return process_NewTable({})
+			return process_TableNew({})
+			
+			
+		else if oneProcess is equal to "Table Copy Security" then
+			return process_TableSecurityCopy({})
 			
 			
 		else if oneProcess is equal to "Data Viewer" then
@@ -387,7 +392,7 @@ end process_PrivSetCopy
 
 
 
-on process_NewTable(prefs)
+on process_TableNew(prefs)
 	-- create a new table
 	
 	-- 2017-11-01 ( eshagdar ): created
@@ -398,7 +403,22 @@ on process_NewTable(prefs)
 	on error errMsg number errNum
 		error "unable to process_NewTable - " & errMsg number errNum
 	end try
-end process_NewTable
+end process_TableNew
+
+
+
+on process_TableSecurityCopy(prefs)
+	-- copy privSet access settings from one table into another.
+	
+	-- 2017-11-01 ( eshagdar ): created
+	
+	
+	try
+		return database's copyPrivSetSettingsForOneTable(prefs)
+	on error errMsg number errNum
+		error "unable to process_TableSecurityCopy - " & errMsg number errNum
+	end try
+end process_TableSecurityCopy
 
 
 
