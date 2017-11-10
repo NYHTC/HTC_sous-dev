@@ -1,4 +1,4 @@
--- HTC sous-dev, privSet library
+-- HTC sous-dev, FM security library
 -- 2017-10-05, Erik Shagdar, NYHTC
 
 (*

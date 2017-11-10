@@ -1,4 +1,4 @@
--- HTC sous-dev, privSet library
+-- HTC sous-dev, FM security library
 -- 2017-10-05, Erik Shagdar, NYHTC
 
 (*
@@ -7,8 +7,8 @@
 
 
 
-property name : "privSet"
-property id : "org.nyhtc.sous-dev.privSet"
+property name : "fmSecurity"
+property id : "org.nyhtc.sous-dev.fmSecurity"
 property version : "0.1"
 
 
@@ -16,6 +16,8 @@ property version : "0.1"
 on copyPrivSetToOthers(prefs)
 	-- copy setting for the currently selected privSet across to all other tenants
 	
+	-- 2017-11-08 ( eshagdar ): show user error via handler. no need to have this handler activate the app.
+	-- 2017-11-08 ( eshagdar ): bug fix: tell 'APP' htcLib.
 	-- 2017-10-05 ( eshagdar ): ensure we're in manage security. moved into privSeet library ( out of main ).
 	-- 2017-06-28 ( eshagdar ): created.
 	
@@ -25,16 +27,16 @@ on copyPrivSetToOthers(prefs)
 	try
 		global AppletName
 		global fullAccessCredentials
+		global htcBasic
+		
 		tell application "htcLib"
 			fmGUI_AppFrontMost()
 			set frontMostWindowName to fmGUI_NameOfFrontmostWindow()
 		end tell
 		
 		if frontMostWindowName does not start with "Manage Security" then
-			tell "htcLib" to fmGUI_ManageSecurity_GoToTab_PrivSets(fullAccessCredentials)
-			tell it to activate
-			display dialog "Select a privSet and try again." with title AppletName buttons "OK" default button "OK"
-			return false
+			tell application "htcLib" to fmGUI_ManageSecurity_GoToTab_PrivSets(fullAccessCredentials)
+			error "Select a privSet and try again." number -1204
 		end if
 		
 		
@@ -46,9 +48,7 @@ on copyPrivSetToOthers(prefs)
 				end tell
 			end tell
 		on error errMsg number errNum
-			tell it to activate
-			display dialog "You must have a privSet selected to run this process." with title AppletName buttons "OK" default button "OK"
-			return false
+			error "You must have a privSet selected to run this process. - " & errMsg number errNum
 		end try
 		
 		
@@ -98,7 +98,6 @@ on copyPrivSetToOthers(prefs)
 		return privSetInfo
 		
 	on error errMsg number errNum
-		tell it to activate
 		error "unable to copyPrivSetToOthers - " & errMsg number errNum
 	end try
 end copyPrivSetToOthers

@@ -4,6 +4,7 @@
 -- written against OS X 10.10.5 and FileMaker 15.0.3
 
 (*
+	2017-11-08 ( eshagdar ): renamed script library 'database' to 'fmDatabase'.
 	2017-11-02 ( eshagdar ): pass prefs thru to sub-handlers. enabled new table process. added 'database' script library
 	2017-10-19 ( eshagdar ): open data viewer. open manage DB. 'added Functions Open' process
 	2017-10-17 ( eshagdar ): update 'promptProcess' to show credential expiration TS.
@@ -37,8 +38,8 @@ property fmObjTrans : ""
 
 use htcBasic : script "htcBasic"
 use credentialsLib : script "credentials"
-use privSetLib : script "privSet"
-use database : script "database"
+use fmSecurity : script "fmSecurity"
+use fmDatabase : script "fmDatabase"
 use scripting additions
 
 
@@ -69,6 +70,7 @@ end quit
 on mainScript(prefs)
 	-- main script to determine what to run
 	
+	-- 2017-11-08 ( eshagdar ): no need to activate. the show error handler already does it.
 	-- 2017-11-01 ( eshagdar ): don't bother showing error stack if user canceled
 	-- 2017-10-23 ( eshagdar ): added prefs. moved processes into separate handlers.
 	-- 2017-xx-xx ( eshagdar ): created
@@ -107,7 +109,6 @@ on mainScript(prefs)
 		set process to item 1 of prefs
 		return runProcess({process:process})
 	on error errMsg number errNum
-		tell it to activate
 		tell application "htcLib" to set errStack to replaceSimple({sourceTEXT:errMsg, oldChars:" - ", newChars:return})
 		set ignoreErrorNumList to {-128, -1024, -1719}
 		(*
@@ -223,54 +224,41 @@ on runProcess(prefs)
 		if oneProcess is equal to "DO NOTHING" or oneProcess is equal to false then
 			return true
 			
-			
 		else if oneProcess is equal to "Full Access Toggle" then
 			return process_fullAccessToggle({})
-			
 			
 		else if oneProcess is equal to "Db Manage" then
 			return process_manageDB({})
 			
-			
 		else if oneProcess is equal to "Functions Open" then
 			return process_functionsOpen({})
-			
 			
 		else if oneProcess is equal to "Security Open" then
 			return process_securityOpen({})
 			
-			
 		else if oneProcess is equal to "Security Save" then
 			return process_securitySave({})
-			
 			
 		else if oneProcess is equal to "PrivSet - copy settings to other PrivSets" then
 			return process_PrivSetCopy({})
 			
-			
 		else if oneProcess is equal to "Table Create" then
 			return process_TableNew({})
-			
 			
 		else if oneProcess is equal to "Table Copy Security" then
 			return process_TableSecurityCopy({})
 			
-			
 		else if oneProcess is equal to "Data Viewer" then
 			return process_dataViewerOpen({})
-			
 			
 		else if oneProcess is equal to "Clipboard Clear" then
 			return process_ClipboardClear({})
 			
-			
 		else if oneProcess is equal to "Credentials Update" then
 			return process_credentialsUpdate({})
 			
-			
 		else if oneProcess is equal to "QUIT" then
 			return process_quit({})
-			
 			
 		else
 			error "unknown process '" & oneProcess & "'" number -1024
@@ -383,7 +371,7 @@ on process_PrivSetCopy(prefs)
 	
 	try
 		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
-		privSetLib's copyPrivSetToOthers(prefs)
+		fmSecurity's copyPrivSetToOthers(prefs)
 		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
 	on error errMsg number errNum
 		error "unable to process_PrivSetCopy - " & errMsg number errNum
@@ -399,7 +387,7 @@ on process_TableNew(prefs)
 	
 	
 	try
-		return database's newTable(prefs)
+		return fmDatabase's newTable(prefs)
 	on error errMsg number errNum
 		error "unable to process_NewTable - " & errMsg number errNum
 	end try
@@ -414,7 +402,7 @@ on process_TableSecurityCopy(prefs)
 	
 	
 	try
-		return database's copyPrivSetSettingsForOneTable(prefs)
+		return fmDatabase's copyPrivSetSettingsForOneTable(prefs)
 	on error errMsg number errNum
 		error "unable to process_TableSecurityCopy - " & errMsg number errNum
 	end try

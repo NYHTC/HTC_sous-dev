@@ -1,4 +1,4 @@
--- HTC sous-dev, privSet library
+-- HTC sous-dev, helper/basics library
 -- 2017-05-03, Erik Shagdar, NYHTC
 
 (*
@@ -110,7 +110,7 @@ on showDialog(prefs)
 		set defaultAnswer to defaultAnswer of prefs
 		
 		tell it to activate
-		if shouldPrompt of prefs or answer of prefs is not equal to "" then
+		if shouldPrompt of prefs or defaultAnswer is not equal to "" then
 			if defaultAnswer is null then set defaultAnswer to ""
 			return display dialog coerceToString(msg of prefs) with title title of prefs default answer defaultAnswer buttons (buttonList of prefs) default button item 1 of buttonList of prefs
 		else
@@ -120,6 +120,23 @@ on showDialog(prefs)
 		error "unable to showDialog - " & errMsg number errNum
 	end try
 end showDialog
+
+
+on systemNotification(prefs)
+	-- version 1.0
+	-- take from htcLib
+	
+	set defaultPrefs to {msg:"", msgTitle:"", msgSubtitle:"", msgSound:"default", noSound:null}
+	set prefs to prefs & defaultPrefs
+	
+	if noSound of prefs is not null then
+		display notification msg of prefs with title msgTitle of prefs subtitle msgSubtitle of prefs
+	else
+		display notification msg of prefs with title msgTitle of prefs subtitle msgSubtitle of prefs sound name msgSound of prefs
+	end if
+	
+end systemNotification
+
 
 
 on coerceToString(incomingObject)

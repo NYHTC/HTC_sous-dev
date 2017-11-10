@@ -1,4 +1,4 @@
--- HTC sous-dev, privSet library
+-- HTC sous-dev, FM database library
 -- 2017-11-02, Erik Shagdar, NYHTC
 
 (*
@@ -43,6 +43,7 @@ end promptTableName
 on ensureTableNames(prefs)
 	-- ensures a source and effect table name
 	
+	-- 2017-11-10 ( eshagdar ): get table names if empty or null.
 	-- 2017-11-07 ( eshagdar ): moved out of creating new table handler. each table name is tested for empty ( in addition to previously being tested for null ). tables are called 'source' and 'effect' instead of 'new' and 'similar'.
 	
 	try
@@ -61,13 +62,13 @@ on ensureTableNames(prefs)
 		
 		-- get name of the EFFECT table ( table being created/modified, etc )
 		if effectMessage is null then set effectMessage to "Enter the name of the table to CHANGE the security in '" & dbName & "' database:"
-		if effectTable is equal to "" then set effectTable to tableName of promptTableName({msg:effectMessage, defaultAnswer:effectTable})
+		if effectTable is equal to "" or effectTable is equal to null then set effectTable to tableName of promptTableName({msg:effectMessage, defaultAnswer:effectTable})
 		tell application "htcLib" to set effectTable to textUpper({str:effectTable})
 		
 		
 		-- get name of SOURCE table ( table whose security is being copied from )
 		if sourceMessage is null then set sourceMessage to "Enter the name of the SOURCE table in '" & dbName & "' database:"
-		if sourceTable is equal to "" then set sourceTable to tableName of promptTableName({msg:sourceMessage, defaultAnswer:sourceTable})
+		if sourceTable is equal to "" or sourceTable is equal to null then set sourceTable to tableName of promptTableName({msg:sourceMessage, defaultAnswer:sourceTable})
 		
 		
 		return {sourceTable:sourceTable, effectTable:effectTable}
