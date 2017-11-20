@@ -217,6 +217,7 @@ on runProcess(prefs)
 			"Table Duplicate Security", Â
 			"Data Viewer", Â
 			"Clipboard Clear", Â
+			"Credentials Authenticate", Â
 			"Credentials Update", Â
 			"QUIT"}
 		set oneProcess to promptProcess({processList:processList})
@@ -254,6 +255,9 @@ on runProcess(prefs)
 			
 		else if oneProcess is equal to "Clipboard Clear" then
 			return process_ClipboardClear({})
+			
+		else if oneProcess is equal to "Credentials Authenticate" then
+			return process_credentialsAuth({})
 			
 		else if oneProcess is equal to "Credentials Update" then
 			return process_credentialsUpdate({})
@@ -454,6 +458,26 @@ on process_ClipboardClear(prefs)
 		error "unable to process_ClipboardClear - " & errMsg number errNum
 	end try
 end process_ClipboardClear
+
+
+
+on process_credentialsAuth(prefs)
+	-- authenticate using current credentials
+	
+	-- 2017-11-20 ( eshagdar ): created
+	
+	
+	try
+		set whichCredential to button returned of htcBasic's showDialog({msg:"Which credentials do you want to authenticate with?", buttonList:{"User", "Full Access", "Cancel"}})
+		if whichCredential is "User" then
+			tell application "htcLib" to return fmGUI_AuthenticateDialog({accountName:userAccountName of userCredentials, pwd:userPassword of userCredentials})
+		else if whichCredential is "Full Access" then
+			tell application "htcLib" to return fmGUI_AuthenticateDialog({accountName:fullAccessAccountName of fullAccessCredentials, pwd:fullAccessPassword of fullAccessCredentials})
+		end if
+	on error errMsg number errNum
+		error "unable to process_credentialsUpdate - " & errMsg number errNum
+	end try
+end process_credentialsAuth
 
 
 
