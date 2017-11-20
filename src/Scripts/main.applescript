@@ -198,6 +198,7 @@ end promptProcess
 on runProcess(prefs)
 	-- run process specified by the user
 	
+	-- 2017-11-20 ( eshagdar ): rename 'Table Copy Security' to 'Table Duplicate Security'
 	-- 2017-11-02 ( eshagdar ): enabled create table process
 	-- 2017-10-18 ( eshagdar ): added quit process
 	-- 2017-06-28 ( eshagdar ): created.
@@ -213,7 +214,7 @@ on runProcess(prefs)
 			"Security Save", Â
 			"PrivSet - copy settings to other PrivSets", Â
 			"Table Create", Â
-			"Table Copy Security", Â
+			"Table Duplicate Security", Â
 			"Data Viewer", Â
 			"Clipboard Clear", Â
 			"Credentials Update", Â
@@ -245,8 +246,8 @@ on runProcess(prefs)
 		else if oneProcess is equal to "Table Create" then
 			return process_TableNew({})
 			
-		else if oneProcess is equal to "Table Copy Security" then
-			return process_TableSecurityCopy({})
+		else if oneProcess is equal to "Table Duplicate Security" then
+			return process_TableSecurityDuplicate({})
 			
 		else if oneProcess is equal to "Data Viewer" then
 			return process_dataViewerOpen({})
@@ -289,6 +290,7 @@ end process_fullAccessToggle
 on process_manageDB(prefs)
 	-- wrapper for opening manage DB
 	
+	-- 2017-11-20 ( eshagdar ): return process result
 	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
@@ -296,12 +298,12 @@ on process_manageDB(prefs)
 	try
 		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
 		tell application "htcLib"
-			fmGUI_Menu_OpenDB(prefs)
+			set processResult to fmGUI_Menu_OpenDB(prefs)
 			windowWaitUntil({windowName:"Manage Database for", whichWindow:"front", windowNameTest:"does not contain", waitCycleDelaySeconds:1, waitCycleMax:30 * minutes})
 		end tell
 		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
 		
-		return true
+		return processResult
 	on error errMsg number errNum
 		error "unable to process_manageDB - " & errMsg number errNum
 	end try
@@ -365,14 +367,17 @@ end process_securitySave
 on process_PrivSetCopy(prefs)
 	-- wrapper for copying a selected privSet
 	
+	-- 2017-11-20 ( eshagdar ): return process result
 	-- 2017-11-02 ( eshagdar ): pass prefs thru
 	-- 2017-10-23 ( eshagdar ): moved from runProcess into a separate handler
 	
 	
 	try
 		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
-		fmSecurity's copyPrivSetToOthers(prefs)
+		set processResult to fmSecurity's copyPrivSetToOthers(prefs)
 		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
+		
+		return processResult
 	on error errMsg number errNum
 		error "unable to process_PrivSetCopy - " & errMsg number errNum
 	end try
@@ -383,11 +388,16 @@ end process_PrivSetCopy
 on process_TableNew(prefs)
 	-- create a new table
 	
+	-- 2017-11-20 ( eshagdar ): return process result. go into full access mode if needed
 	-- 2017-11-01 ( eshagdar ): created
 	
 	
 	try
-		return fmDatabase's newTable(prefs)
+		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
+		set processResult to fmDatabase's newTable(prefs)
+		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
+		
+		return processResult
 	on error errMsg number errNum
 		error "unable to process_NewTable - " & errMsg number errNum
 	end try
@@ -395,18 +405,23 @@ end process_TableNew
 
 
 
-on process_TableSecurityCopy(prefs)
+on process_TableSecurityDuplicate(prefs)
 	-- copy privSet access settings from one table into another.
 	
+	-- 2017-11-20 ( eshagdar ): return process result. go into full access mode if needed
 	-- 2017-11-01 ( eshagdar ): created
 	
 	
 	try
-		return fmDatabase's copyPrivSetSettingsForOneTable(prefs)
+		set fullAccessToggle to process_fullAccessToggle({ensureMode:"full"})
+		set processResult to fmDatabase's copyPrivSetSettingsForOneTable(prefs)
+		if modeSwitch of fullAccessToggle then process_fullAccessToggle({})
+		
+		return processResult
 	on error errMsg number errNum
-		error "unable to process_TableSecurityCopy - " & errMsg number errNum
+		error "unable to process_TableSecurityDuplicate - " & errMsg number errNum
 	end try
-end process_TableSecurityCopy
+end process_TableSecurityDuplicate
 
 
 
