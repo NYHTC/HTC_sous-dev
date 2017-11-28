@@ -215,6 +215,7 @@ on runProcess(prefs)
 			"PrivSet - copy settings to other PrivSets", Â
 			"Table Create", Â
 			"Table Duplicate Security", Â
+			"Table Copy Security for PrivSet", Â
 			"Data Viewer", Â
 			"Clipboard Clear", Â
 			"Credentials Authenticate", Â
@@ -249,6 +250,9 @@ on runProcess(prefs)
 			
 		else if oneProcess is equal to "Table Duplicate Security" then
 			return process_TableSecurityDuplicate({})
+			
+		else if oneProcess is equal to "Table Copy Security for PrivSet" then
+			return process_TableSecurityCopy({})
 			
 		else if oneProcess is equal to "Data Viewer" then
 			return process_dataViewerOpen({})
@@ -410,7 +414,7 @@ end process_TableNew
 
 
 on process_TableSecurityDuplicate(prefs)
-	-- copy privSet access settings from one table into another.
+	-- duplicate privSet access settings from one table into another.
 	
 	-- 2017-11-20 ( eshagdar ): return process result. go into full access mode if needed
 	-- 2017-11-01 ( eshagdar ): created
@@ -426,6 +430,30 @@ on process_TableSecurityDuplicate(prefs)
 		error "unable to process_TableSecurityDuplicate - " & errMsg number errNum
 	end try
 end process_TableSecurityDuplicate
+
+
+
+on process_TableSecurityCopy(prefs)
+	-- copy settings for the currently selected privSet into the clipbaord.
+	
+	-- 2017-11-28 ( eshagdar ): created
+	
+	
+	try
+		tell application "htcLib"
+			with timeout of (30 * 60) seconds
+				--get info can cause the appleEvent to time out if there are many tables or complex security
+				set privSetInfo to fmGUI_ManageSecurity_PrivSet_GetInfo({} & {getAccessInfo:true})
+			end timeout
+			fmGUI_ObjectClick_CancelButton({})
+		end tell
+		set the clipboard to privSetInfo
+		
+		return privSetInfo
+	on error errMsg number errNum
+		error "unable to process_TableSecurityDuplicate - " & errMsg number errNum
+	end try
+end process_TableSecurityCopy
 
 
 
