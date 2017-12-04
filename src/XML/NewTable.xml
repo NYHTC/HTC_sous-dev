@@ -250,7 +250,7 @@ Let ( [
 GetValue ( 
 	Substitute ( 
 		GetFieldName ( Self ); 
-		[ "::"; "¶" ] 
+		[ "::"; Char ( 13 ) ] 
 	); 
 	1 
 )]]></Calculation>
