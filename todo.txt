@@ -1,3 +1,9 @@
 - open manage db should stop if there are unsaved scripts
 - manage DB should make 1st non-script/data viewer/debugger window open be frontmost
 - process to authenticate - useful when logging in
+- new table should Full-Access toggle ( if needed )
+- talk to 'manage layouts window' ( not the frontmost window )
+- duplicate security -> allow to be already in manage security
+- new process:
+	copy security options to clipboard
+	modify security from clipboard
