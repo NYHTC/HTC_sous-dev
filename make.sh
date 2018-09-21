@@ -5,8 +5,9 @@
 # Erik Shagdar, NYHTC
 # 
 # 
-# 2017-11-02 ( eshagdar ): added fmObjTrans vendor file
-# 2017-10-20 ( eshagdar ): created
+# 2018-09-21 ( eshagdar ): create user script library folder if needed.
+# 2017-11-02 ( eshagdar ): added fmObjTrans vendor file.
+# 2017-10-20 ( eshagdar ): created.
 
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -29,6 +30,10 @@ USER_SCRIPT_LIBRARY_DIR="$HOME/Library/$SCRIPT_LIB_NAME"
 VEN_DIR="$ROOT_DIR/vendor"
 VEN_DIR_CLIPTOOLS="$VEN_DIR/FmClipTools"
 VEN_LIB_FMOBJ="fmObjectTranslator.applescript"
+
+
+# create /Users/«user»/Library/Script Libraries dir, if needed
+if [ ! -d "$USER_SCRIPT_LIBRARY_DIR" ]; then mkdir "$USER_SCRIPT_LIBRARY_DIR"; fi
 
 
 # create vendor dir, if needed
