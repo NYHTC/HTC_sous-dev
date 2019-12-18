@@ -16,7 +16,7 @@ git pull
 
 # recompile htcLib
 HTCLIB_DIR="$( osascript -e 'tell application "Finder" to return POSIX path of (folder of (path to application "htcLib") as string)')"
-. "$HTCLIB_DIR/recompile.sh"
+. "$HTCLIB_DIR/../recompile.sh"
 echo "you must re-allow assistive devices to 'HTC sous-dev'."
 
 cd "$ROOT_SOUSDEV_DIR"
