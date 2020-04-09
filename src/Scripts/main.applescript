@@ -1,9 +1,13 @@
 -- HTC sous-dev
--- 2017-05-03, Erik Shagdar, NYHTC
+-- 2020-04-09, Erik Shagdar, NYHTC
 
--- written against OS X 10.10.5 and FileMaker 15.0.3
+(* 
 
-(*
+	Originally written against OS X 10.10.5 and FileMaker 15.0.3. But, at least as of 2020-04-09, it seems to work for FileMaker 17 and macOS 10.12.6 Mojave. 
+
+
+HISTORY:
+	2020-04-09 ( dshockley ): Added a 15-minute timeout around the runProcess call. Some comments updated. 
 	2017-11-08 ( eshagdar ): renamed script library 'database' to 'fmDatabase'.
 	2017-11-02 ( eshagdar ): pass prefs thru to sub-handlers. enabled new table process. added 'database' script library
 	2017-10-19 ( eshagdar ): open data viewer. open manage DB. 'added Functions Open' process
@@ -107,7 +111,11 @@ on mainScript(prefs)
 		
 		-- prompt user what to do
 		set process to item 1 of prefs
-		return runProcess({process:process})
+		
+		with timeout of 15 * 60 seconds --- give a timeout of FIFTEEN MINUTES! 
+			return runProcess({process:process})
+		end timeout
+		
 	on error errMsg number errNum
 		tell application "htcLib" to set errStack to replaceSimple({sourceTEXT:errMsg, oldChars:" - ", newChars:return})
 		set ignoreErrorNumList to {-128, -1024, -1719}
